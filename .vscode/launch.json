@@ -20,9 +20,8 @@
       "restart": true,
       "runtimeArgs": [
         "run",
-        "start",
-        "--",
-        "--inspect-brk"
+        "debug",
+        "code"
       ],
       "runtimeExecutable": "npm",
     }

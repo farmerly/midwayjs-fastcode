@@ -7,14 +7,16 @@
   "author": "farmerly",
   "license": "MIT",
   "dependencies": {
+    "date-fns": "^2.29.2",
     "mysql2": "^2.3.3",
-    "sequelize": "^6.12.0-beta.3",
+    "sequelize": "^6.21.4",
     "yargs": "^17.5.1"
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.36",
     "@types/node": "^16.11.12",
     "@types/sequelize": "^4.28.10",
+    "@types/yargs": "^17.0.12",
     "@typescript-eslint/eslint-plugin": "^5.36.2",
     "@typescript-eslint/parser": "^5.36.2",
     "eslint": "^8.23.0",
@@ -26,13 +28,8 @@
     "typescript": "^4.5.4"
   },
   "scripts": {
-    "start": "ts-node-dev --respawn --transpile-only src/index.ts generate",
-    "style:prettier": "prettier --write \"src/**/*.ts\"",
-    "style:lint": "tslint -p tsconfig.json -c tslint.json",
-    "code": "node dist/index.js",
+    "debug": "ts-node-dev src/generator.ts",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "build": "tsc"
-  },
-  "bin": {
-    "creator": "./src/index.js"
   }
 }
