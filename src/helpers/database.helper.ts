@@ -1,4 +1,3 @@
-import { format } from 'date-fns';
 import * as fs from 'fs';
 import { Sequelize } from 'sequelize';
 
