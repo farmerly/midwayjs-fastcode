@@ -1,0 +1,38 @@
+{
+  "name": "midwayjs-fastcode",
+  "version": "1.0.0",
+  "description": "midwayjs 代码生成器",
+  "main": "index.js",
+  "repository": "git@github.com:farmerly/midwayjs-fastcode.git",
+  "author": "farmerly",
+  "license": "MIT",
+  "dependencies": {
+    "mysql2": "^2.3.3",
+    "sequelize": "^6.12.0-beta.3",
+    "yargs": "^17.5.1"
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.36",
+    "@types/node": "^16.11.12",
+    "@types/sequelize": "^4.28.10",
+    "@typescript-eslint/eslint-plugin": "^5.36.2",
+    "@typescript-eslint/parser": "^5.36.2",
+    "eslint": "^8.23.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.7.1",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.5.4"
+  },
+  "scripts": {
+    "start": "ts-node-dev --respawn --transpile-only src/index.ts generate",
+    "style:prettier": "prettier --write \"src/**/*.ts\"",
+    "style:lint": "tslint -p tsconfig.json -c tslint.json",
+    "code": "node dist/index.js",
+    "build": "tsc"
+  },
+  "bin": {
+    "creator": "./src/index.js"
+  }
+}
