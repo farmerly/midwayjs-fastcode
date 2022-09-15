@@ -7,13 +7,13 @@ const getConfig = (rcInfo, env) => {
 };
 
 const Tables = {
-  tableSchema: { type: DataTypes.STRING(64), comment: '数据库名称' },
+  tableSchema: { type: DataTypes.STRING(64), comment: '表所属数据库' },
   tableName: { type: DataTypes.STRING(64), comment: '表名称' },
   tableComment: { type: DataTypes.TEXT, comment: '表注释' },
 };
 
 const Columns = {
-  tableSchema: { type: DataTypes.STRING(64), comment: '数据库名称' },
+  tableSchema: { type: DataTypes.STRING(64), comment: '表所属数据库' },
   tableName: { type: DataTypes.STRING(64), comment: '表名称' },
   columnName: { type: DataTypes.STRING(64), comment: '字段名称' },
   columnComment: { type: DataTypes.TEXT, comment: '字段注释' },
@@ -25,6 +25,22 @@ const Columns = {
   columnKey: {
     type: DataTypes.ENUM('', 'PRI', 'UNI', 'MUL'),
     comment: '字段类型',
+  },
+};
+
+const KeyColumnUsage = {
+  constraintSchema: { type: DataTypes.STRING(64), comment: '约束所属数据库' },
+  constraintName: { type: DataTypes.STRING(64), comment: '约束名称' },
+  tableSchema: { type: DataTypes.STRING(64), comment: '表所属数据库' },
+  tableName: { type: DataTypes.STRING(64), comment: '表名称' },
+  columnName: { type: DataTypes.STRING(64), comment: '字段名称' },
+  referencedTableName: {
+    type: DataTypes.STRING(64),
+    comment: '：约束引用的表的名称',
+  },
+  referencedColumnName: {
+    type: DataTypes.STRING(64),
+    comment: '：约束引用的表的名称',
   },
 };
 
@@ -63,6 +79,8 @@ export default class DBContext {
     this.sequelize = new Sequelize(config);
     this.sequelize.define('tables', Tables);
     this.sequelize.define('columns', Columns);
+    this.sequelize.define('key_column_usage', KeyColumnUsage);
+    this.sequelize.define('referential_constraints', ReferentialConstraints);
   }
 
   async connect() {
