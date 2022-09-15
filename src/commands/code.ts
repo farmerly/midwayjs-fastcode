@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as Bb from 'bluebird';
 import baseOptions from '../lib/yargs';
 import print from '../helpers/print.helper';
 import database from '../helpers/database.helper';
@@ -13,7 +14,7 @@ const loadRcFile = () => {
     : undefined;
 };
 
-export default (yargs) => {
+export default async (yargs) => {
   const args = baseOptions(yargs).argv;
   print(`当前运行环境[${args['env']}]`);
   const rcInfo = loadRcFile();
@@ -21,5 +22,13 @@ export default (yargs) => {
     print('未找到 .sequelizerc 配置文件', 'error');
     return;
   }
-  const sequelize = database(rcInfo, args['env']);
+  const db = new database(rcInfo, args['env']);
+  await db.connect();
+  const tables = await db.getTables();
+  console.log(tables);
+  await Bb.each(tables, async (table) => {
+    const columns = await db.getColumns(table.tableName);
+    console.log(columns);
+  });
+  await db.disconnect();
 };

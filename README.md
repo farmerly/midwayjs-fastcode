@@ -1,5 +1,7 @@
 # midway fastcode
 
+---
+
 ## sequelize
 
 ### database 配置文件
@@ -45,4 +47,18 @@ module.exports = {
   'seeders-path': path.join(__dirname, 'database/seeders'),
   'models-path': path.join(__dirname, 'src/lib/models'),
 };
+```
+
+## 生成器使用方式
+
+```js
+{
+  ...,
+  "scripts": {
+    ...
+    "code": "node ./node_modules/code-generator-wzc/index.js",
+    ...
+  },
+  ...
+}
 ```
