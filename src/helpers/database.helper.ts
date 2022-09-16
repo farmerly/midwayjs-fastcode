@@ -1,4 +1,6 @@
-import * as fs from 'fs';
+import fs from 'fs';
+import _ from 'lodash';
+import Bb from 'bluebird';
 import print from '../helpers/print.helper';
 import { DataTypes, Sequelize } from 'sequelize';
 
@@ -28,6 +30,36 @@ const Columns = {
   },
 };
 
+const ReferentialConstraints = {
+  constraintSchema: { type: DataTypes.STRING(64), comment: '约束所属数据库' },
+  constraintName: { type: DataTypes.STRING(64), comment: '约束名称' },
+  updateRule: {
+    type: DataTypes.ENUM(
+      'NO ACTION',
+      'RESTRICT',
+      'CASCADE',
+      'SET NULL',
+      'SET DEFAULT',
+    ),
+    comment: '约束ON UPDATE属性的值',
+  },
+  deleteRule: {
+    type: DataTypes.ENUM(
+      'NO ACTION',
+      'RESTRICT',
+      'CASCADE',
+      'SET NULL',
+      'SET DEFAULT',
+    ),
+    comment: '约束ON DELETE属性的值',
+  },
+  tableName: { type: DataTypes.STRING(64), comment: '表名称' },
+  referencedTableName: {
+    type: DataTypes.STRING(64),
+    comment: '：约束引用的表的名称',
+  },
+};
+
 const KeyColumnUsage = {
   constraintSchema: { type: DataTypes.STRING(64), comment: '约束所属数据库' },
   constraintName: { type: DataTypes.STRING(64), comment: '约束名称' },
@@ -39,26 +71,6 @@ const KeyColumnUsage = {
     comment: '：约束引用的表的名称',
   },
   referencedColumnName: {
-    type: DataTypes.STRING(64),
-    comment: '：约束引用的表的名称',
-  },
-};
-
-const ReferentialConstraints = {
-  constraintSchema: { type: DataTypes.STRING(64), comment: '约束所属数据库' },
-  constraintName: { type: DataTypes.STRING(64), comment: '约束名称' },
-  updateRule: {
-    type: DataTypes.ENUM,
-    comment:
-      '约束ON UPDATE属性的值(CASCADE, SET NULL, SET DEFAULT, RESTRICT, NO ACTION)',
-  },
-  deleteRule: {
-    type: DataTypes.ENUM,
-    comment:
-      '约束ON DELETE属性的值(CASCADE, SET NULL, SET DEFAULT, RESTRICT, NO ACTION)',
-  },
-  tableName: { type: DataTypes.STRING(64), comment: '表名称' },
-  referencedTableName: {
     type: DataTypes.STRING(64),
     comment: '：约束引用的表的名称',
   },
@@ -145,6 +157,53 @@ export default class DBContext {
       })
       .then((list) => {
         return list.map((p) => p.dataValues);
+      });
+  }
+
+  async getreferentialConstraints(
+    tableName: string,
+    type: 'foreignKeys' | 'references',
+  ) {
+    const whereOptions = { constraintSchema: this.database };
+    if (type === 'foreignKeys') {
+      _.set(whereOptions, 'tableName', tableName);
+    } else {
+      _.set(whereOptions, 'referencedTableName', tableName);
+    }
+
+    return this.sequelize.models.referential_constraints
+      .findAll({
+        where: whereOptions,
+        attributes: [
+          'constraintSchema',
+          'constraintName',
+          'updateRule',
+          'deleteRule',
+          'tableName',
+          'referencedTableName',
+        ],
+      })
+      .then((list) => {
+        const dataList = list.map((p) => p.dataValues);
+        return Bb.map(dataList, (p: any) => {
+          const columnUsage = this.sequelize.models.key_column_usage
+            .findOne({
+              where: {
+                constraintSchema: p.constraintSchema,
+                constraintName: p.constraintName,
+              },
+              attributes: [
+                'constraintSchema',
+                'constraintName',
+                'tableName',
+                'columnName',
+                'referencedTableName',
+                'referencedColumnName',
+              ],
+            })
+            .then((result) => result.dataValues);
+          return { ...p, columnUsage };
+        });
       });
   }
 }

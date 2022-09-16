@@ -1,17 +1,39 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as Bb from 'bluebird';
+import fs from 'fs';
+import path from 'path';
+import Bb from 'bluebird';
+import inquirer from 'inquirer';
 import baseOptions from '../lib/yargs';
 import print from '../helpers/print.helper';
 import database from '../helpers/database.helper';
-
-const codeGenerator = (rcInfo, env) => {};
+import stringComplement from '../helpers/complement.helper';
 
 const loadRcFile = () => {
   const rcFile = path.resolve(process.cwd(), '.sequelizerc');
   return fs.existsSync(rcFile)
     ? JSON.parse(JSON.stringify(require(rcFile)))
     : undefined;
+};
+
+const choiceTables = async (
+  tables: { tableName: string; tableComment: string }[],
+) => {
+  const message = `选择需要生成的表名称:`;
+  const choices = await Bb.map(tables, (p) => {
+    const name = stringComplement(p.tableName, 'suffix');
+    const comment = stringComplement(p.tableComment, 'prefix');
+    return { name: `${name} <----> ${comment}`, value: p };
+  });
+
+  return inquirer
+    .prompt([
+      {
+        name: 'data',
+        type: 'checkbox',
+        message: message,
+        choices: choices,
+      },
+    ])
+    .then((ret) => ret.data);
 };
 
 export default async (yargs) => {
@@ -25,10 +47,20 @@ export default async (yargs) => {
   const db = new database(rcInfo, args['env']);
   await db.connect();
   const tables = await db.getTables();
-  console.log(tables);
-  await Bb.each(tables, async (table) => {
+  const finalTables: any[] = await choiceTables(tables);
+  await Bb.each(finalTables, async (table) => {
     const columns = await db.getColumns(table.tableName);
+    const foreignKeys = await db.getreferentialConstraints(
+      table.tableName,
+      'foreignKeys',
+    );
+    const references = await db.getreferentialConstraints(
+      table.tableName,
+      'references',
+    );
     console.log(columns);
+    console.log(foreignKeys);
+    console.log(references);
   });
   await db.disconnect();
 };

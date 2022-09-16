@@ -1,5 +1,5 @@
 {
-  "name": "midwayjs-fastcode",
+  "name": "@midwayjs/fastcode",
   "version": "1.0.0",
   "description": "midwayjs 代码生成器",
   "main": "index.js",
@@ -9,6 +9,7 @@
   "dependencies": {
     "bluebird": "^3.7.2",
     "date-fns": "^2.29.2",
+    "inquirer": "^9.1.1",
     "mysql2": "^2.3.3",
     "sequelize": "^6.21.4",
     "yargs": "^17.5.1"
@@ -32,5 +33,6 @@
     "debug": "ts-node-dev src/generator.ts",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "build": "tsc"
-  }
+  },
+  "type": "module"
 }
