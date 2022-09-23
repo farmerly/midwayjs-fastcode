@@ -1,0 +1,13 @@
+import { BaseEntity, BASE_ENTITY } from '../lib/base/base.entity';
+import { Table, Column, DataType } from 'sequelize-typescript';
+
+@Table({
+  tableName: '<%= tableName %>',
+  comment: '<%= tableComment %>',
+})
+export class <%= className %>Entity extends BaseEntity {
+}
+
+
+export class <%= classNameUpper %> extends BASE_ENTITY {
+}

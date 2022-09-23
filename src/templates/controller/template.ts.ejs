@@ -1,0 +1,7 @@
+import { Controller } from '@midwayjs/decorator';
+import { ApiTags } from '@midwayjs/swagger';
+
+@ApiTags('<%= apiTags %>')
+@Controller('/api/<%= routePath %>')
+export default class <%= className %>Controller {
+}

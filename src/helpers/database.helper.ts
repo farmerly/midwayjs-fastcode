@@ -3,6 +3,7 @@ import _ from 'lodash';
 import Bb from 'bluebird';
 import print from '../helpers/print.helper';
 import { DataTypes, Sequelize } from 'sequelize';
+import { Op } from 'sequelize';
 
 const getConfig = (rcInfo, env) => {
   return fs.existsSync(rcInfo.config) ? require(rcInfo.config)[env] : undefined;
@@ -87,6 +88,7 @@ export default class DBContext {
     config.define = {
       charset: 'utf8',
       underscored: true,
+      freezeTableName: true,
     };
     this.sequelize = new Sequelize(config);
     this.sequelize.define('tables', Tables);
@@ -118,6 +120,9 @@ export default class DBContext {
       .findAll({
         where: {
           tableSchema: this.database,
+          tableName: {
+            [Op.notIn]: ['sequelizedata', 'sequelizemeta'],
+          },
         },
         attributes: ['tableName', 'tableComment'],
       })
@@ -163,7 +168,24 @@ export default class DBContext {
   async getreferentialConstraints(
     tableName: string,
     type: 'foreignKeys' | 'references',
-  ) {
+  ): Promise<
+    {
+      constraintSchema: string;
+      constraintName: string;
+      updateRule: string;
+      deleteRule: string;
+      tableName: string;
+      referencedTableName: string;
+      columnUsage: {
+        constraintSchema: string;
+        constraintName: string;
+        tableName: string;
+        columnName: string;
+        referencedTableName: string;
+        referencedColumnName: string;
+      };
+    }[]
+  > {
     const whereOptions = { constraintSchema: this.database };
     if (type === 'foreignKeys') {
       _.set(whereOptions, 'tableName', tableName);
@@ -171,39 +193,45 @@ export default class DBContext {
       _.set(whereOptions, 'referencedTableName', tableName);
     }
 
-    return this.sequelize.models.referential_constraints
-      .findAll({
-        where: whereOptions,
-        attributes: [
-          'constraintSchema',
-          'constraintName',
-          'updateRule',
-          'deleteRule',
-          'tableName',
-          'referencedTableName',
-        ],
-      })
-      .then((list) => {
-        const dataList = list.map((p) => p.dataValues);
-        return Bb.map(dataList, (p: any) => {
-          const columnUsage = this.sequelize.models.key_column_usage
-            .findOne({
-              where: {
-                constraintSchema: p.constraintSchema,
-                constraintName: p.constraintName,
-              },
-              attributes: [
-                'constraintSchema',
-                'constraintName',
-                'tableName',
-                'columnName',
-                'referencedTableName',
-                'referencedColumnName',
-              ],
-            })
-            .then((result) => result.dataValues);
-          return { ...p, columnUsage };
-        });
-      });
+    const list = await this.sequelize.models.referential_constraints.findAll({
+      where: whereOptions,
+      attributes: [
+        'constraintSchema',
+        'constraintName',
+        'updateRule',
+        'deleteRule',
+        'tableName',
+        'referencedTableName',
+      ],
+    });
+
+    const dataList = list.map((p) => p.dataValues);
+    return Bb.map(dataList, async (p: any) => {
+      const columnUsage = await this.sequelize.models.key_column_usage
+        .findOne({
+          where: {
+            constraintSchema: p.constraintSchema,
+            constraintName: p.constraintName,
+          },
+          attributes: [
+            'constraintSchema',
+            'constraintName',
+            'tableName',
+            'columnName',
+            'referencedTableName',
+            'referencedColumnName',
+          ],
+        })
+        .then((result) => result.dataValues);
+      return { ...p, columnUsage };
+    });
+  }
+
+  async getTableDetails(tableName: string) {
+    return Bb.props({
+      columns: this.getColumns(tableName),
+      foreignKeys: this.getreferentialConstraints(tableName, 'foreignKeys'),
+      references: this.getreferentialConstraints(tableName, 'references'),
+    });
   }
 }
