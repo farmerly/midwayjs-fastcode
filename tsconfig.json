@@ -23,6 +23,10 @@
   "exclude": [
     "dist",
     "node_modules",
-    "test"
+    "test",
+    "src/controller",
+    "src/dto",
+    "src/entity",
+    "src/service"
   ]
 }
