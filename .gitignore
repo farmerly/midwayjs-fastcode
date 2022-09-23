@@ -37,3 +37,9 @@ lerna-debug.log*
 # sequelize
 .sequelizerc
 /database
+
+# generate files
+/src/controller
+/src/dto
+/src/entity
+/src/service

@@ -3,6 +3,7 @@ import _ from 'lodash';
 import Bb from 'bluebird';
 import print from '../helpers/print.helper';
 import { DataTypes, Sequelize } from 'sequelize';
+import { Op } from 'sequelize';
 
 const getConfig = (rcInfo, env) => {
   return fs.existsSync(rcInfo.config) ? require(rcInfo.config)[env] : undefined;
@@ -119,6 +120,9 @@ export default class DBContext {
       .findAll({
         where: {
           tableSchema: this.database,
+          tableName: {
+            [Op.notIn]: ['sequelizedata', 'sequelizemeta'],
+          },
         },
         attributes: ['tableName', 'tableComment'],
       })

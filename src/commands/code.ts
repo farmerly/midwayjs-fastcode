@@ -3,12 +3,12 @@ import _ from 'lodash';
 import path from 'path';
 import Bb from 'bluebird';
 import inquirer from 'inquirer';
-import templates from '../helpers/template.helper';
-import generate from '../helpers/generate.helper';
 import baseOptions from '../lib/yargs';
 import print from '../helpers/print.helper';
 import database from '../helpers/database.helper';
 import stringComplement from '../helpers/complement.helper';
+import templates from '../helpers/template.helper';
+import FactoryManager from '../templates/factory-manager';
 
 const loadRcFile = () => {
   const rcFile = path.resolve(process.cwd(), '.sequelizerc');
@@ -92,7 +92,11 @@ export default async (yargs) => {
 
   await Bb.each(finalTables, async (table) => {
     const info = await db.getTableDetails(table.tableName);
-    await generate(table, info, finalTemplates);
+    const factory = new FactoryManager();
+    await Bb.each(finalTemplates, async (p: any) => {
+      const generator = factory.getGenerator(p.name);
+      await generator.generate(table, info, p.path);
+    });
   });
   await db.disconnect();
 };
