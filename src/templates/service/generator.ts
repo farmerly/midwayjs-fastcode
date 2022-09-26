@@ -1,5 +1,5 @@
 import BaseGenerator from '../generator';
-import print from '../../helpers/print.helper';
+import print from '../../lib/utils/print';
 import ejs from 'ejs';
 import fs from 'fs';
 import path from 'path';

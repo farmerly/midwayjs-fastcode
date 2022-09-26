@@ -3,11 +3,11 @@ import _ from 'lodash';
 import path from 'path';
 import Bb from 'bluebird';
 import inquirer from 'inquirer';
-import baseOptions from '../lib/yargs';
-import print from '../helpers/print.helper';
-import database from '../helpers/database.helper';
-import stringComplement from '../helpers/complement.helper';
-import templates from '../helpers/template.helper';
+import baseOptions from '../lib/utils/yargs';
+import print from '../lib/utils/print';
+import database from '../lib/utils/database';
+import stringComplement from '../lib/utils/complement';
+import templates from '../lib/constant/template-module';
 import FactoryManager from '../templates/factory-manager';
 
 const loadRcFile = () => {

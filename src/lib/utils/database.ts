@@ -1,7 +1,7 @@
 import fs from 'fs';
 import _ from 'lodash';
 import Bb from 'bluebird';
-import print from '../helpers/print.helper';
+import print from './print';
 import { DataTypes, Sequelize } from 'sequelize';
 import { Op } from 'sequelize';
 

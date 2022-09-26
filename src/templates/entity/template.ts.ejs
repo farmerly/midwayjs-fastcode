@@ -6,8 +6,10 @@ import { Table, Column, DataType } from 'sequelize-typescript';
   comment: '<%= tableComment %>',
 })
 export class <%= className %>Entity extends BaseEntity {
+<%= fieldsOfEntity %>
 }
 
 
 export class <%= classNameUpper %> extends BASE_ENTITY {
+<%= fieldsOfStatic %>
 }

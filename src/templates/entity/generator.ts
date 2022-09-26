@@ -1,9 +1,22 @@
 import BaseGenerator from '../generator';
-import print from '../../helpers/print.helper';
+import print from '../../lib/utils/print';
 import ejs from 'ejs';
 import fs from 'fs';
 import path from 'path';
 import _ from 'lodash';
+import defaultColumn from '../../lib/constant/default-column';
+
+const sequelizeColGenerate = (info: {
+  columns: any[];
+  foreignKeys: any[];
+  references: any[];
+}) => {};
+
+const staticFieldsGenerate = (info: {
+  columns: any[];
+  foreignKeys: any[];
+  references: any[];
+}) => {};
 
 export default class EntityGenerator extends BaseGenerator {
   async generate(
@@ -24,6 +37,8 @@ export default class EntityGenerator extends BaseGenerator {
     _.set(data, 'tableName', this.pascalConvert(table.tableName));
     _.set(data, 'tableComment', table.tableComment);
 
+    const fieldsOfEntity = sequelizeColGenerate(info);
+    _.set(data, 'fieldsOfEntity', fieldsOfEntity);
     const templatePath = path.join(__dirname, 'template.ts.ejs');
     const template = fs.readFileSync(templatePath, 'utf8');
     const content = ejs.compile(template)(data);
